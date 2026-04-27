@@ -109,6 +109,7 @@
             flex-wrap: wrap;
             max-width: 1000px;
             width: 100%;
+            transition: opacity 0.3s ease; /* Transição suave */
         }
 
         .vs-badge {
@@ -208,12 +209,17 @@
 
         #loading {
             display: none;
-            font-size: 24px;
+            font-size: 18px;
             color: var(--accent-color);
             font-weight: bold;
             position: absolute; 
             animation: pulse 1s infinite alternate;
             text-align: center;
+            z-index: 50;
+            background-color: rgba(28, 31, 38, 0.95);
+            padding: 15px 30px;
+            border-radius: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
 
         @keyframes pulse {
@@ -439,7 +445,8 @@
                 // Restaura o texto de carregamento padrão
                 loadingText.innerText = "Buscando músicas na internet... 🎧";
                 
-                // Inicia o jogo
+                // Inicia o jogo sem esconder o container
+                loadingText.style.display = 'none';
                 renderMatch();
 
             } catch (error) {
@@ -596,7 +603,10 @@
             updateRoundTitle();
             undoBtn.disabled = historyStack.length === 0;
 
-            matchContainer.style.display = 'none'; 
+            // CORREÇÃO: Mantém o container no lugar, apenas deixa opaco e impede cliques. 
+            // O site NÃO encolhe mais!
+            matchContainer.style.opacity = '0.3';
+            matchContainer.style.pointerEvents = 'none';
             loadingText.style.display = 'block';
 
             const song1 = bracket[currentRoundIdx][matchIndex];
@@ -605,11 +615,14 @@
             await Promise.all([fetchSongInfo(song1), fetchSongInfo(song2)]);
 
             loadingText.style.display = 'none';
-            matchContainer.style.display = 'flex';
-
+            
             matchContainer.innerHTML = createCardHTML(song1, 1) + 
                                        `<div class="vs-badge">VS</div>` + 
                                        createCardHTML(song2, 2);
+                                       
+            // Traz o container de volta após carregar
+            matchContainer.style.opacity = '1';
+            matchContainer.style.pointerEvents = 'auto';
             
             renderBracketUI();
         }
@@ -675,7 +688,6 @@
             `;
         }
 
-        // Chama a função inicial em vez de começar direto no renderMatch
         initTournament();
     </script>
 </body>
