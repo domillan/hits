@@ -42,10 +42,10 @@
             text-align: center;
         }
 
-        .restart-btn {
+        /* ESTILO DOS BOTÕES FIXOS (TOP) */
+        .restart-btn, .credits {
             position: fixed;
             top: 20px;
-            right: 20px;
             background-color: rgba(28, 31, 38, 0.8);
             color: #8b92a5;
             border: 1px solid #8b92a5;
@@ -56,9 +56,13 @@
             transition: 0.3s;
             z-index: 1000;
             backdrop-filter: blur(5px);
+            text-decoration: none;
         }
 
-        .restart-btn:hover {
+        .restart-btn { right: 20px; }
+        .credits { left: 20px; }
+
+        .restart-btn:hover, .credits:hover {
             background-color: var(--accent-color);
             color: #fff;
             border-color: var(--accent-color);
@@ -436,6 +440,7 @@
 </head>
 <body>
 
+    <a href="https://github.com/domillan" target="_blank" class="credits">Feito por D. Millan</a>
     <button class="restart-btn" onclick="restartTournament()">🔄 Reiniciar Tudo</button>
 
     <h1 id="main-title">Batalha de Músicas: Anos 2000 e 2010</h1>
@@ -490,7 +495,6 @@
         const undoBtn = document.getElementById('undo-btn');
         const winnerContainer = document.getElementById('winner-container');
 
-        // Função auxiliar para evitar quebra de HTML (Escape)
         function escapeHTML(str) {
             if (!str) return '';
             return str.toString().replace(/[&<>'"]/g, 
@@ -542,7 +546,7 @@
         }
 
         async function initTournament() {
-            pauseOtherAudios(null); // Pausa qualquer áudio que esteja tocando antes de reiniciar
+            pauseOtherAudios(null);
             bracket = [ [], [], [], [], [], [], [] ];
             currentRoundIdx = 0;
             matchIndex = 0;
@@ -583,7 +587,7 @@
                     if (data.results.length > 0 && data.results[0].previewUrl) {
                         return { img: data.results[0].artworkUrl100.replace('100x100bb', '600x600bb'), audio: data.results[0].previewUrl };
                     }
-                } catch (error) { console.warn('Falha na busca completa no iTunes:', error); }
+                } catch (error) { console.warn('Falha no iTunes (Completo):', error); }
 
                 try {
                     const response2 = await fetch(`https://itunes.apple.com/search?term=${queryTitleOnly}&entity=song&limit=5`, { signal });
@@ -592,7 +596,7 @@
                     if (track) {
                         return { img: track.artworkUrl100.replace('100x100bb', '600x600bb'), audio: track.previewUrl };
                     }
-                } catch (error) { console.warn('Falha na busca por título no iTunes:', error); }
+                } catch (error) { console.warn('Falha no iTunes (Título):', error); }
 
                 try {
                     const deezerUrl = encodeURIComponent(`https://api.deezer.com/search?q=${queryFull}`);
@@ -602,7 +606,7 @@
                     if (deezerData.data && deezerData.data.length > 0 && deezerData.data[0].preview) {
                         return { img: deezerData.data[0].album.cover_xl, audio: deezerData.data[0].preview };
                     }
-                } catch (error) { console.warn('Falha na busca no Deezer via proxy:', error); }
+                } catch (error) { console.warn('Falha no Deezer:', error); }
 
                 return { img: '', audio: '' };
             })();
@@ -652,7 +656,6 @@
                 title.innerText = colDef.side === 'center' ? 'Vencedora' : roundNames[colDef.r];
                 col.appendChild(title);
 
-                // Cálculo dinâmico com base no tamanho inicial do array de músicas
                 const totalInRound = bracket[0].length / Math.pow(2, colDef.r);
                 const itemsInCol = colDef.side === 'center' ? 1 : totalInRound / 2;
                 const size = thumbSizes[colDef.r];
@@ -678,7 +681,6 @@
                         const bgClass = isBlurred ? 'slot-bg blurred' : 'slot-bg';
                         slot.innerHTML = `<div class="${bgClass}" style="background-image: url('${imgSrc}')" onclick="toggleSingleBlur(event)"></div>`;
                         
-                        // Uso da função de escape para segurança
                         const safeTitle = escapeHTML(song.title);
                         const safeArtist = escapeHTML(song.artist);
                         slot.innerHTML += `<span class="tooltip">${safeTitle}<br>${safeArtist}</span>`;
