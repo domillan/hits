@@ -490,6 +490,20 @@
         const undoBtn = document.getElementById('undo-btn');
         const winnerContainer = document.getElementById('winner-container');
 
+        // Função auxiliar para evitar quebra de HTML (Escape)
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str.toString().replace(/[&<>'"]/g, 
+                tag => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    "'": '&#39;',
+                    '"': '&quot;'
+                }[tag])
+            );
+        }
+
         function applyGlobalBlur() {
             const shouldBlur = document.getElementById('hide-images-toggle').checked;
             document.querySelectorAll('.card img, .slot-bg').forEach(el => {
@@ -528,6 +542,7 @@
         }
 
         async function initTournament() {
+            pauseOtherAudios(null); // Pausa qualquer áudio que esteja tocando antes de reiniciar
             bracket = [ [], [], [], [], [], [], [] ];
             currentRoundIdx = 0;
             matchIndex = 0;
@@ -548,6 +563,7 @@
                 renderMatch();
             } catch (error) {
                 loadingText.innerText = "Erro ao carregar lista!";
+                console.error("Erro ao carregar o JSON do tema:", error);
             }
         }
 
@@ -567,7 +583,7 @@
                     if (data.results.length > 0 && data.results[0].previewUrl) {
                         return { img: data.results[0].artworkUrl100.replace('100x100bb', '600x600bb'), audio: data.results[0].previewUrl };
                     }
-                } catch (error) {}
+                } catch (error) { console.warn('Falha na busca completa no iTunes:', error); }
 
                 try {
                     const response2 = await fetch(`https://itunes.apple.com/search?term=${queryTitleOnly}&entity=song&limit=5`, { signal });
@@ -576,7 +592,7 @@
                     if (track) {
                         return { img: track.artworkUrl100.replace('100x100bb', '600x600bb'), audio: track.previewUrl };
                     }
-                } catch (error) {}
+                } catch (error) { console.warn('Falha na busca por título no iTunes:', error); }
 
                 try {
                     const deezerUrl = encodeURIComponent(`https://api.deezer.com/search?q=${queryFull}`);
@@ -586,7 +602,7 @@
                     if (deezerData.data && deezerData.data.length > 0 && deezerData.data[0].preview) {
                         return { img: deezerData.data[0].album.cover_xl, audio: deezerData.data[0].preview };
                     }
-                } catch (error) {}
+                } catch (error) { console.warn('Falha na busca no Deezer via proxy:', error); }
 
                 return { img: '', audio: '' };
             })();
@@ -636,7 +652,8 @@
                 title.innerText = colDef.side === 'center' ? 'Vencedora' : roundNames[colDef.r];
                 col.appendChild(title);
 
-                const totalInRound = 64 / Math.pow(2, colDef.r);
+                // Cálculo dinâmico com base no tamanho inicial do array de músicas
+                const totalInRound = bracket[0].length / Math.pow(2, colDef.r);
                 const itemsInCol = colDef.side === 'center' ? 1 : totalInRound / 2;
                 const size = thumbSizes[colDef.r];
 
@@ -660,7 +677,11 @@
                         const imgSrc = song.img || `https://ui-avatars.com/api/?background=ff2a5f&color=fff&font-size=0.4&name=${encodeURIComponent(song.title.charAt(0))}`;
                         const bgClass = isBlurred ? 'slot-bg blurred' : 'slot-bg';
                         slot.innerHTML = `<div class="${bgClass}" style="background-image: url('${imgSrc}')" onclick="toggleSingleBlur(event)"></div>`;
-                        slot.innerHTML += `<span class="tooltip">${song.title}<br>${song.artist}</span>`;
+                        
+                        // Uso da função de escape para segurança
+                        const safeTitle = escapeHTML(song.title);
+                        const safeArtist = escapeHTML(song.artist);
+                        slot.innerHTML += `<span class="tooltip">${safeTitle}<br>${safeArtist}</span>`;
                     } else {
                         slot.innerText = "?";
                     }
@@ -715,13 +736,16 @@
         }
 
         function createCardHTML(song, choiceId) {
+            const safeTitle = escapeHTML(song.title);
+            const safeArtist = escapeHTML(song.artist);
             const imgSrc = song.img || `https://ui-avatars.com/api/?size=320&background=1c1f26&color=ff2a5f&font-size=0.5&name=${encodeURIComponent(song.title.charAt(0))}`;
+            
             return `
                 <div class="card">
                     <img src="${imgSrc}" onclick="toggleSingleBlur(event)">
                     <div class="card-info">
-                        <div class="song-title">${song.title}</div>
-                        <div class="song-artist">${song.artist}</div>
+                        <div class="song-title" title="${safeTitle}">${safeTitle}</div>
+                        <div class="song-artist" title="${safeArtist}">${safeArtist}</div>
                     </div>
                     <audio controls onplay="pauseOtherAudios(this)"><source src="${song.audio || ''}" type="audio/mpeg"></audio>
                     <button class="vote-btn" onclick="processVote(${choiceId})">Votar</button>
@@ -752,12 +776,15 @@
             winnerContainer.style.display = 'flex';
             undoBtn.disabled = false; 
 
+            const safeTitle = escapeHTML(song.title);
+            const safeArtist = escapeHTML(song.artist);
+
             document.getElementById('winner-card').innerHTML = `
                 <div class="card" style="width: 350px; height: 600px; cursor: default; transform: scale(1.05); margin-top:20px; margin-bottom:20px;">
                     <img src="${song.img || `https://ui-avatars.com/api/?size=320&background=1c1f26&color=ff2a5f&font-size=0.5&name=${encodeURIComponent(song.title.charAt(0))}`}" style="height: 350px;" onclick="toggleSingleBlur(event)">
                     <div class="card-info">
-                        <div class="song-title">${song.title}</div>
-                        <div class="song-artist">${song.artist}</div>
+                        <div class="song-title" title="${safeTitle}">${safeTitle}</div>
+                        <div class="song-artist" title="${safeArtist}">${safeArtist}</div>
                     </div>
                     ${song.audio ? `<audio controls style="margin-top:auto;" onplay="pauseOtherAudios(this)"><source src="${song.audio}" type="audio/mpeg"></audio>` : ''}
                 </div>
