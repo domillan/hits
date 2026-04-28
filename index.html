@@ -71,7 +71,7 @@
             flex-wrap: wrap;
             gap: 10px;
             margin-top: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             max-width: 900px;
         }
 
@@ -96,6 +96,34 @@
             background-color: var(--accent-color);
             border-color: #fff;
             box-shadow: 0 0 10px rgba(255, 42, 95, 0.5);
+        }
+
+        /* TOGGLE OCULTAR IMAGENS */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #8b92a5;
+            cursor: pointer;
+            background: #1c1f26;
+            padding: 8px 15px;
+            border-radius: 20px;
+        }
+
+        .toggle-container input {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent-color);
+        }
+
+        /* EFEITO DE BLUR */
+        .blurred {
+            filter: blur(30px) grayscale(1);
+            transition: filter 0.3s ease;
+            cursor: pointer !important;
         }
 
         .controls {
@@ -172,11 +200,6 @@
             justify-content: space-between; 
         }
 
-        .card:hover {
-            transform: translateY(-8px);
-            border: 2px solid var(--accent-color);
-        }
-
         .card img {
             width: 100%;
             height: 300px;
@@ -234,12 +257,6 @@
             margin-top: auto;
         }
 
-        .vote-btn:hover {
-            background-color: #ff4d79;
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(255, 42, 95, 0.4);
-        }
-
         #loading {
             display: none;
             font-size: 24px;
@@ -251,19 +268,6 @@
             z-index: 50;
         }
 
-        @keyframes pulse {
-            from { opacity: 0.5; }
-            to { opacity: 1; }
-        }
-
-        #winner-container {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-        }
-
-        /* ESTILOS DO MATA-MATA */
         #bracket-ui {
             margin-top: 40px;
             width: 100%;
@@ -274,23 +278,6 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
             box-sizing: border-box;
             overflow-x: auto;
-            -webkit-overflow-scrolling: touch; 
-        }
-
-        #bracket-ui h3 {
-            text-align: center;
-            color: #8b92a5;
-            margin-top: 0;
-            margin-bottom: 10px;
-            font-size: 24px;
-        }
-
-        .scroll-hint {
-            text-align: center;
-            color: #555;
-            font-size: 12px;
-            margin-bottom: 20px;
-            display: none;
         }
 
         .bracket-board {
@@ -308,16 +295,6 @@
             align-items: center;
             flex: 1;
             padding: 0 5px;
-        }
-
-        .bracket-column-title {
-            font-size: 12px;
-            color: #777;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            font-weight: bold;
-            text-align: center;
-            height: 20px;
         }
 
         .bracket-slot {
@@ -340,13 +317,6 @@
             border-color: var(--accent-color);
             cursor: pointer;
             color: transparent; 
-        }
-
-        .bracket-slot.filled:hover {
-            transform: scale(1.8);
-            z-index: 50;
-            box-shadow: 0 0 15px var(--accent-color);
-            border-radius: 8px;
         }
 
         .bracket-slot .tooltip {
@@ -373,43 +343,18 @@
             line-height: 1.3;
         }
 
-        .bracket-slot .tooltip::after {
-            content: "";
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            margin-left: -5px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: #fff transparent transparent transparent;
-        }
-
         .bracket-slot.filled:hover .tooltip {
             visibility: visible;
             opacity: 1;
         }
 
-        .bracket-column:first-child .tooltip { left: 0; transform: translateX(0); }
-        .bracket-column:first-child .tooltip::after { left: 15px; margin-left: 0; }
-        .bracket-column:last-child .tooltip { left: auto; right: 0; transform: translateX(0); }
-        .bracket-column:last-child .tooltip::after { left: auto; right: 15px; margin-left: 0; }
-
-        /* ========================================= */
-        /* RESPONSIVIDADE PARA CELULARES E TABLETS */
-        /* ========================================= */
         @media (max-width: 768px) {
             h1 { font-size: 1.8em; margin-top: 40px; }
-            h2 { font-size: 1.2em; }
-            .restart-btn { top: 10px; right: 10px; padding: 6px 12px; font-size: 12px; }
             .arena { min-height: auto; padding-bottom: 20px; }
             .match-container { flex-direction: column; gap: 15px; }
             .card { width: 100%; max-width: 320px; height: auto; min-height: 480px; }
-            .card img { height: 250px; }
-            .vs-badge { font-size: 20px; padding: 10px; z-index: 10; margin: -20px 0; box-shadow: 0 0 10px rgba(0,0,0,0.8); }
-            .scroll-hint { display: block; }
+            .vs-badge { font-size: 20px; padding: 10px; margin: -20px 0; }
             .bracket-board { height: 600px; }
-            #winner-container .card { width: 100%; max-width: 320px; height: auto; transform: scale(1); }
-            #winner-container .card img { height: 300px !important; }
         }
     </style>
 </head>
@@ -428,6 +373,11 @@
         <button class="theme-btn" onclick="changeTheme('brasil.json', this, 'Músicas Brasileiras')">Brasileiras</button>
     </div>
 
+    <label class="toggle-container">
+        <input type="checkbox" id="hide-images-toggle" onchange="applyGlobalBlur()">
+        Ocultar imagens (blur)
+    </label>
+
     <h2 id="round-title">Carregando as músicas...</h2>
 
     <div class="controls">
@@ -436,9 +386,7 @@
 
     <div class="arena">
         <div id="loading">Buscando músicas na internet... 🎧</div>
-
         <div class="match-container" id="match-container"></div>
-
         <div id="winner-container">
             <h1 style="color: gold; text-shadow: 0 0 10px rgba(255,215,0,0.5);">🏆 A MELHOR MÚSICA 🏆</h1>
             <div id="winner-card" style="margin-top: 10px;"></div>
@@ -447,7 +395,7 @@
 
     <div id="bracket-ui">
         <h3>Quadro de Músicas</h3>
-        <p class="scroll-hint">👉 Deslize para os lados para ver o quadro completo 👈</p>
+        <p style="text-align:center; color:#555; font-size:12px;">👉 Deslize para os lados para ver o quadro completo 👈</p>
         <div class="bracket-board" id="bracket-board"></div>
     </div>
 
@@ -456,7 +404,6 @@
         let currentRoundIdx = 0; 
         let matchIndex = 0;      
         let historyStack = [];   
-        
         let currentThemeFile = '2000e2010.json';
 
         const matchContainer = document.getElementById('match-container');
@@ -465,91 +412,71 @@
         const undoBtn = document.getElementById('undo-btn');
         const winnerContainer = document.getElementById('winner-container');
 
-        // Altera o tema atual se o usuário confirmar
+        // FUNÇÃO PARA GERENCIAR O BLUR NAS IMAGENS
+        function applyGlobalBlur() {
+            const shouldBlur = document.getElementById('hide-images-toggle').checked;
+            
+            document.querySelectorAll('.card img, .bracket-slot').forEach(el => {
+                if (shouldBlur) {
+                    el.classList.add('blurred');
+                } else {
+                    el.classList.remove('blurred');
+                }
+            });
+        }
+
+        // Função para alternar blur em uma imagem específica ao clicar
+        function toggleSingleBlur(event) {
+            const isToggleActive = document.getElementById('hide-images-toggle').checked;
+            if (isToggleActive) {
+                event.target.classList.toggle('blurred');
+            }
+        }
+
         function changeTheme(file, btnElement, themeName) {
-            if (confirm(`Alterar para a lista "${themeName}" irá apagar a batalha atual e reiniciá-la. Tem certeza?`)) {
-                // Atualiza os botões visualmente
+            if (confirm(`Alterar para a lista "${themeName}" irá reiniciar a batalha. Continuar?`)) {
                 document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
                 btnElement.classList.add('active');
-                
-                // Atualiza o Título e o Arquivo JSON alvo
                 document.getElementById('main-title').innerText = `Batalha de Hits: ${themeName}`;
                 currentThemeFile = file;
-                
                 initTournament();
             }
         }
 
-        // Função Principal para Carregar JSON e Iniciar/Reiniciar
         async function initTournament() {
-            // Limpeza Total de Variáveis de Estado
             bracket = [ [], [], [], [], [], [], [] ];
             currentRoundIdx = 0;
             matchIndex = 0;
             historyStack = [];
-            
-            // Restaura Visuais da Arena
             undoBtn.disabled = true;
             winnerContainer.style.display = 'none';
             roundTitle.style.display = 'block';
             matchContainer.innerHTML = '';
             document.getElementById('bracket-board').innerHTML = '';
-
             loadingText.style.display = 'block';
-            loadingText.innerText = "Carregando lista de músicas... 📂";
-            loadingText.style.color = "var(--accent-color)";
-            
-            matchContainer.style.opacity = '0.3';
-            matchContainer.style.pointerEvents = 'none';
             
             try {
                 const response = await fetch(currentThemeFile);
-                
-                if (!response.ok) {
-                    throw new Error("Erro ao carregar o arquivo.");
-                }
-                
                 const initialSongs = await response.json();
-                
-                // Embaralha as músicas e joga na primeira rodada
                 bracket[0] = [...initialSongs].sort(() => Math.random() - 0.5); 
-                
-                loadingText.innerText = "Buscando músicas na internet... 🎧";
                 loadingText.style.display = 'none';
                 renderMatch();
-
             } catch (error) {
-                console.error("Erro no JSON:", error);
-                loadingText.innerText = `Erro ao carregar o arquivo '${currentThemeFile}'!\nCertifique-se de que ele foi criado e que o site está num servidor local.`;
-                loadingText.style.color = "red";
+                loadingText.innerText = "Erro ao carregar lista!";
             }
         }
 
-        document.addEventListener('play', function(e) {
-            const audios = document.getElementsByTagName('audio');
-            for (let i = 0; i < audios.length; i++) {
-                if (audios[i] !== e.target) audios[i].pause();
-            }
-        }, true);
-
-        // O botão superior de reiniciar agora roda o Init sem recarregar a página toda
-        function restartTournament() {
-            if (confirm("Tem certeza que deseja apagar a progressão e iniciar este torneio do zero?")) {
-                initTournament();
-            }
-        }
-
-async function fetchSongInfo(song) {
+        // FUNÇÃO BLINDADA: Busca Tripla Restaurada
+        async function fetchSongInfo(song) {
             if (song.loaded) return song; 
             
             const queryFull = encodeURIComponent(`${song.title} ${song.artist}`);
             const queryTitleOnly = encodeURIComponent(`${song.title}`);
             
-            // TENTATIVA 1: iTunes (Busca Exata - Título + Artista)
+            // Tentativa 1: iTunes (Exata)
             try {
                 const response = await fetch(`https://itunes.apple.com/search?term=${queryFull}&entity=song&limit=1`);
                 const data = await response.json();
-                
                 if (data.results.length > 0 && data.results[0].previewUrl) {
                     song.img = data.results[0].artworkUrl100.replace('100x100bb', '600x600bb');
                     song.audio = data.results[0].previewUrl;
@@ -557,16 +484,14 @@ async function fetchSongInfo(song) {
                     return song;
                 }
             } catch (error) {
-                console.warn(`iTunes (Exata) falhou para ${song.title}.`);
+                console.warn(`iTunes Exata falhou para ${song.title}`);
             }
 
-            // TENTATIVA 2: iTunes (Busca Ampla - Apenas Título)
-            // Resolve o problema de feats não creditados corretamente que bugam a API
+            // Tentativa 2: iTunes (Ampla - só o título) - Ajuda com feats confusos
             try {
                 const response2 = await fetch(`https://itunes.apple.com/search?term=${queryTitleOnly}&entity=song&limit=5`);
                 const data2 = await response2.json();
                 
-                // Pega a primeira música da lista que tenha áudio liberado
                 const track = data2.results.find(t => t.previewUrl);
                 if (track) {
                     song.img = track.artworkUrl100.replace('100x100bb', '600x600bb');
@@ -575,14 +500,12 @@ async function fetchSongInfo(song) {
                     return song;
                 }
             } catch (error) {
-                console.warn(`iTunes (Ampla) falhou para ${song.title}.`);
+                console.warn(`iTunes Ampla falhou para ${song.title}`);
             }
 
-            // TENTATIVA 3: Deezer com Proxy (Plano de Salvação)
-            // O proxy é OBRIGATÓRIO aqui, senão o navegador bloqueia a requisição (Erro de CORS)
+            // Tentativa 3: Deezer com Proxy (Essencial para GitHub Pages)
             try {
                 const deezerUrl = encodeURIComponent(`https://api.deezer.com/search?q=${queryFull}`);
-                // Usando um proxy diferente, focado em alta velocidade
                 const proxyUrl = `https://api.allorigins.win/raw?url=${deezerUrl}`; 
                 
                 const deezerResponse = await fetch(proxyUrl);
@@ -595,31 +518,20 @@ async function fetchSongInfo(song) {
                     return song;
                 }
             } catch (error) {
-                console.warn(`Deezer falhou para ${song.title}. Música oficialmente inacessível nas APIs abertas.`);
+                console.warn(`Deezer falhou para ${song.title}`);
             }
 
-            // PLANO C: Fallback para não quebrar o layout
+            // Plano C: Apenas Inicial (Fallback gerado no HTML para não quebrar layout)
             song.img = '';
             song.audio = '';
             song.loaded = true;
             return song;
         }
 
-        function updateRoundTitle() {
-            const totalRemaining = bracket[currentRoundIdx].length;
-            const currentMatch = (matchIndex / 2) + 1;
-            const totalMatches = totalRemaining / 2;
-            
-            const roundNames = ["Fase de 32", "Fase de 16", "Oitavas", "Quartas", "Semi-final", "Final"];
-            
-            if(currentRoundIdx < 6) {
-                roundTitle.innerText = `${roundNames[currentRoundIdx]}: Duelo ${currentMatch} de ${totalMatches}`;
-            }
-        }
-
         function renderBracketUI() {
             const board = document.getElementById('bracket-board');
             board.innerHTML = '';
+            const isBlurred = document.getElementById('hide-images-toggle').checked;
 
             const columnsConfig = [
                 { r: 0, side: 'left' }, { r: 1, side: 'left' }, { r: 2, side: 'left' },
@@ -629,52 +541,30 @@ async function fetchSongInfo(song) {
                 { r: 2, side: 'right' }, { r: 1, side: 'right' }, { r: 0, side: 'right' }
             ];
 
-            const roundNames = ["Fase de 32", "Fase de 16", "Oitavas", "Quartas", "Semi-final", "Final", "Campeã"];
-            const thumbSizes = [22, 32, 45, 60, 80, 100, 140]; 
-
             columnsConfig.forEach(colDef => {
                 const col = document.createElement('div');
                 col.className = 'bracket-column';
-                
-                const title = document.createElement('div');
-                title.className = 'bracket-column-title';
-                title.innerText = colDef.side === 'center' ? 'Vencedora' : roundNames[colDef.r];
-                col.appendChild(title);
-
                 const totalInRound = 64 / Math.pow(2, colDef.r);
                 const itemsInCol = colDef.side === 'center' ? 1 : totalInRound / 2;
-                const size = thumbSizes[colDef.r];
 
                 for (let i = 0; i < itemsInCol; i++) {
                     const slot = document.createElement('div');
                     slot.className = 'bracket-slot';
-                    slot.style.width = size + 'px';
-                    slot.style.height = size + 'px';
+                    if (isBlurred) slot.classList.add('blurred');
+                    slot.onclick = toggleSingleBlur;
 
                     let index = colDef.side === 'left' ? i : (colDef.side === 'right' ? i + itemsInCol : 0);
                     const song = bracket[colDef.r][index];
                     
-                    let isRevealed = true;
-                    if (colDef.r === 0 && currentRoundIdx === 0 && index > matchIndex + 1) {
-                        isRevealed = false;
-                    }
-
-                    if (song && isRevealed) {
+                    if (song && (colDef.r > 0 || index <= matchIndex + 1)) {
                         slot.classList.add('filled');
-                        
-                        if (song.img) {
-                            slot.style.backgroundImage = `url('${song.img}')`;
-                        } else {
-                            slot.style.backgroundImage = `url('https://ui-avatars.com/api/?background=ff2a5f&color=fff&font-size=0.4&name=${encodeURIComponent(song.title.charAt(0))}')`;
-                        }
-                        
-                        slot.innerHTML = `<span class="tooltip">${song.title}<br><small style="font-weight:normal;">${song.artist}</small></span>`;
+                        // Se não tiver imagem, carrega a Letra Inicial via API do UI-Avatars
+                        const imgSrc = song.img || `https://ui-avatars.com/api/?background=ff2a5f&color=fff&font-size=0.4&name=${encodeURIComponent(song.title.charAt(0))}`;
+                        slot.style.backgroundImage = `url('${imgSrc}')`;
+                        slot.innerHTML += `<span class="tooltip">${song.title}<br>${song.artist}</span>`;
                     } else {
-                        slot.classList.remove('filled');
-                        slot.style.backgroundImage = 'none';
-                        slot.innerHTML = "?";
+                        slot.innerText = "?";
                     }
-
                     col.appendChild(slot);
                 }
                 board.appendChild(col);
@@ -684,7 +574,6 @@ async function fetchSongInfo(song) {
         async function renderMatch() {
             winnerContainer.style.display = 'none';
             roundTitle.style.display = 'block';
-
             renderBracketUI(); 
             
             if (bracket[6].length === 1) {
@@ -697,70 +586,53 @@ async function fetchSongInfo(song) {
                 matchIndex = 0;
             }
 
-            updateRoundTitle();
+            const totalRemaining = bracket[currentRoundIdx].length;
+            roundTitle.innerText = `Rodada de ${totalRemaining}: Duelo ${(matchIndex/2)+1} de ${totalRemaining/2}`;
             undoBtn.disabled = historyStack.length === 0;
 
             matchContainer.style.opacity = '0.3';
             matchContainer.style.pointerEvents = 'none';
             loadingText.style.display = 'block';
 
-            const song1 = bracket[currentRoundIdx][matchIndex];
-            const song2 = bracket[currentRoundIdx][matchIndex + 1];
-
-            await Promise.all([fetchSongInfo(song1), fetchSongInfo(song2)]);
+            const song1 = await fetchSongInfo(bracket[currentRoundIdx][matchIndex]);
+            const song2 = await fetchSongInfo(bracket[currentRoundIdx][matchIndex + 1]);
 
             loadingText.style.display = 'none';
-            
-            matchContainer.innerHTML = createCardHTML(song1, 1) + 
-                                       `<div class="vs-badge">VS</div>` + 
-                                       createCardHTML(song2, 2);
-                                       
+            matchContainer.innerHTML = createCardHTML(song1, 1) + `<div class="vs-badge">VS</div>` + createCardHTML(song2, 2);
             matchContainer.style.opacity = '1';
             matchContainer.style.pointerEvents = 'auto';
-            
-            renderBracketUI();
+            applyGlobalBlur();
         }
 
         function createCardHTML(song, choiceId) {
-            const audioHtml = song.audio 
-                ? `<audio controls controlsList="nodownload"><source src="${song.audio}" type="audio/mpeg"></audio>`
-                : `<div style="height: 40px; color: #888; font-size:12px; margin-bottom: 15px; display:flex; align-items:center; justify-content:center;">Áudio indisponível</div>`;
-
+            const imgSrc = song.img || `https://ui-avatars.com/api/?size=320&background=1c1f26&color=ff2a5f&font-size=0.5&name=${encodeURIComponent(song.title.charAt(0))}`;
             return `
                 <div class="card">
-                    <img src="${song.img || 'https://ui-avatars.com/api/?size=320&background=1c1f26&color=ff2a5f&font-size=0.5&name=' + song.title.charAt(0)}" alt="Capa">
+                    <img src="${imgSrc}" onclick="toggleSingleBlur(event)">
                     <div class="card-info">
-                        <div class="song-title" title="${song.title}">${song.title}</div>
+                        <div class="song-title">${song.title}</div>
                         <div class="song-artist">${song.artist}</div>
                     </div>
-                    ${audioHtml}
-                    <button class="vote-btn" onclick="processVote(${choiceId})">Votar Nesta</button>
+                    <audio controls><source src="${song.audio || ''}" type="audio/mpeg"></audio>
+                    <button class="vote-btn" onclick="processVote(${choiceId})">Votar</button>
                 </div>
             `;
         }
 
         function processVote(choice) {
-            document.querySelectorAll('audio').forEach(audio => audio.pause());
-
-            historyStack.push({
-                bracket: JSON.parse(JSON.stringify(bracket)), 
-                currentRoundIdx: currentRoundIdx,
-                matchIndex: matchIndex
-            });
-
+            document.querySelectorAll('audio').forEach(a => a.pause());
+            historyStack.push({ bracket: JSON.parse(JSON.stringify(bracket)), currentRoundIdx, matchIndex });
             const winner = choice === 1 ? bracket[currentRoundIdx][matchIndex] : bracket[currentRoundIdx][matchIndex + 1];
             bracket[currentRoundIdx + 1].push(winner);
-            
             matchIndex += 2;
             renderMatch();
         }
 
         function undoVote() {
-            if (historyStack.length === 0) return;
-            const lastState = historyStack.pop();
-            bracket = lastState.bracket;
-            currentRoundIdx = lastState.currentRoundIdx;
-            matchIndex = lastState.matchIndex;
+            const last = historyStack.pop();
+            bracket = last.bracket;
+            currentRoundIdx = last.currentRoundIdx;
+            matchIndex = last.matchIndex;
             renderMatch();
         }
 
@@ -768,21 +640,15 @@ async function fetchSongInfo(song) {
             roundTitle.style.display = 'none';
             matchContainer.style.display = 'none';
             winnerContainer.style.display = 'flex';
-            undoBtn.disabled = false; 
-
-            document.getElementById('winner-card').innerHTML = `
-                <div class="card" style="width: 350px; height: 600px; cursor: default; transform: scale(1.05); margin-top:20px; margin-bottom:20px;">
-                    <img src="${song.img}" alt="Capa ${song.title}" style="height: 350px;">
-                    <div class="card-info">
-                        <div class="song-title">${song.title}</div>
-                        <div class="song-artist">${song.artist}</div>
-                    </div>
-                    ${song.audio ? `<audio controls style="margin-top:auto;"><source src="${song.audio}" type="audio/mpeg"></audio>` : ''}
-                </div>
-            `;
+            document.getElementById('winner-card').innerHTML = createCardHTML(song, 0);
+            document.querySelector('#winner-card .vote-btn').style.display = 'none';
+            applyGlobalBlur();
         }
 
-        // Inicia o torneio
+        function restartTournament() {
+            if (confirm("Reiniciar torneio?")) initTournament();
+        }
+
         initTournament();
     </script>
 </body>
