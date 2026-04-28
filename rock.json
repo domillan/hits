@@ -1,0 +1,258 @@
+[
+    {
+        "title": "Like a Rolling Stone",
+        "artist": "Bob Dylan"
+    },
+    {
+        "title": "(I Can't Get No) Satisfaction",
+        "artist": "The Rolling Stones"
+    },
+    {
+        "title": "Stairway to Heaven",
+        "artist": "Led Zeppelin"
+    },
+    {
+        "title": "Bohemian Rhapsody",
+        "artist": "Queen"
+    },
+    {
+        "title": "Smells Like Teen Spirit",
+        "artist": "Nirvana"
+    },
+    {
+        "title": "Imagine",
+        "artist": "John Lennon"
+    },
+    {
+        "title": "Hey Jude",
+        "artist": "The Beatles"
+    },
+    {
+        "title": "Good Vibrations",
+        "artist": "The Beach Boys"
+    },
+    {
+        "title": "Johnny B. Goode",
+        "artist": "Chuck Berry"
+    },
+    {
+        "title": "Hotel California",
+        "artist": "The Eagles"
+    },
+    {
+        "title": "Purple Haze",
+        "artist": "Jimi Hendrix"
+    },
+    {
+        "title": "Comfortably Numb",
+        "artist": "Pink Floyd"
+    },
+    {
+        "title": "Born to Run",
+        "artist": "Bruce Springsteen"
+    },
+    {
+        "title": "Back in Black",
+        "artist": "AC/DC"
+    },
+    {
+        "title": "My Generation",
+        "artist": "The Who"
+    },
+    {
+        "title": "London Calling",
+        "artist": "The Clash"
+    },
+    {
+        "title": "Gimme Shelter",
+        "artist": "The Rolling Stones"
+    },
+    {
+        "title": "Yesterday",
+        "artist": "The Beatles"
+    },
+    {
+        "title": "Whole Lotta Love",
+        "artist": "Led Zeppelin"
+    },
+    {
+        "title": "Heroes",
+        "artist": "David Bowie"
+    },
+    {
+        "title": "All Along the Watchtower",
+        "artist": "Jimi Hendrix"
+    },
+    {
+        "title": "Paranoid",
+        "artist": "Black Sabbath"
+    },
+    {
+        "title": "Smoke on the Water",
+        "artist": "Deep Purple"
+    },
+    {
+        "title": "Another Brick in the Wall (Part II)",
+        "artist": "Pink Floyd"
+    },
+    {
+        "title": "Seven Nation Army",
+        "artist": "The White Stripes"
+    },
+    {
+        "title": "A Day in the Life",
+        "artist": "The Beatles"
+    },
+    {
+        "title": "Creep",
+        "artist": "Radiohead"
+    },
+    {
+        "title": "Under the Bridge",
+        "artist": "Red Hot Chili Peppers"
+    },
+    {
+        "title": "Losing My Religion",
+        "artist": "R.E.M."
+    },
+    {
+        "title": "Highway to Hell",
+        "artist": "AC/DC"
+    },
+    {
+        "title": "Dream On",
+        "artist": "Aerosmith"
+    },
+    {
+        "title": "Layla",
+        "artist": "Derek and the Dominos"
+    },
+    {
+        "title": "Born to Be Wild",
+        "artist": "Steppenwolf"
+    },
+    {
+        "title": "Thunderstruck",
+        "artist": "AC/DC"
+    },
+    {
+        "title": "Mr. Brightside",
+        "artist": "The Killers"
+    },
+    {
+        "title": "In the End",
+        "artist": "Linkin Park"
+    },
+    {
+        "title": "Don't Stop Believin'",
+        "artist": "Journey"
+    },
+    {
+        "title": "Welcome to the Jungle",
+        "artist": "Guns N' Roses"
+    },
+    {
+        "title": "Enter Sandman",
+        "artist": "Metallica"
+    },
+    {
+        "title": "Everlong",
+        "artist": "Foo Fighters"
+    },
+    {
+        "title": "Wish You Were Here",
+        "artist": "Pink Floyd"
+    },
+    {
+        "title": "Baba O'Riley",
+        "artist": "The Who"
+    },
+    {
+        "title": "Kashmir",
+        "artist": "Led Zeppelin"
+    },
+    {
+        "title": "Paint It, Black",
+        "artist": "The Rolling Stones"
+    },
+    {
+        "title": "Sultans of Swing",
+        "artist": "Dire Straits"
+    },
+    {
+        "title": "More Than a Feeling",
+        "artist": "Boston"
+    },
+    {
+        "title": "Every Breath You Take",
+        "artist": "The Police"
+    },
+    {
+        "title": "Walk This Way",
+        "artist": "Aerosmith"
+    },
+    {
+        "title": "Live Forever",
+        "artist": "Oasis"
+    },
+    {
+        "title": "Wonderwall",
+        "artist": "Oasis"
+    },
+    {
+        "title": "Black Hole Sun",
+        "artist": "Soundgarden"
+    },
+    {
+        "title": "Bitter Sweet Symphony",
+        "artist": "The Verve"
+    },
+    {
+        "title": "Californication",
+        "artist": "Red Hot Chili Peppers"
+    },
+    {
+        "title": "Free Bird",
+        "artist": "Lynyrd Skynyrd"
+    },
+    {
+        "title": "Under Pressure",
+        "artist": "Queen & David Bowie"
+    },
+    {
+        "title": "We Will Rock You",
+        "artist": "Queen"
+    },
+    {
+        "title": "Sunshine of Your Love",
+        "artist": "Cream"
+    },
+    {
+        "title": "Heartbreak Hotel",
+        "artist": "Elvis Presley"
+    },
+    {
+        "title": "Help!",
+        "artist": "The Beatles"
+    },
+    {
+        "title": "Sweet Child O' Mine",
+        "artist": "Guns N' Roses"
+    },
+    {
+        "title": "Ace of Spades",
+        "artist": "Motörhead"
+    },
+    {
+        "title": "Let It Be",
+        "artist": "The Beatles"
+    },
+    {
+        "title": "One",
+        "artist": "U2"
+    },
+    {
+        "title": "Bullet With Butterfly Wings",
+        "artist": "The Smashing Pumpkins"
+    }
+]
