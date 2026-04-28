@@ -20,6 +20,10 @@
         "artist": "Ariana Grande"
     },
     {
+        "title": "God is a Woman",
+        "artist": "Ariana Grande"
+    },
+    {
         "title": "thank u, next",
         "artist": "Ariana Grande"
     },
@@ -29,10 +33,6 @@
     },
     {
         "title": "In the Name of Love",
-        "artist": "Bebe Rexha"
-    },
-    {
-        "title": "Me, Myself & I",
         "artist": "Bebe Rexha"
     },
     {
@@ -46,10 +46,6 @@
     {
         "title": "Single Ladies (Put a Ring on It)",
         "artist": "Beyoncé"
-    },
-    {
-        "title": "lovely",
-        "artist": "Billie Eilish"
     },
     {
         "title": "BIRDS OF A FEATHER",
@@ -74,6 +70,10 @@
     {
         "title": "Havana",
         "artist": "Camila Cabello"
+    },
+    {
+        "title": "Call Me Maybe",
+        "artist": "Carly Rae Jepsen"
     },
     {
         "title": "a thousand years",
@@ -116,6 +116,10 @@
         "artist": "Katy Perry"
     },
     {
+        "title": "Bad Romance",
+        "artist": "Lady Gaga"
+    },
+    {
         "title": "Die With A Smile",
         "artist": "Lady Gaga"
     },
@@ -140,7 +144,7 @@
         "artist": "Madonna"
     },
     {
-        "title": "Material Girl",
+        "title": "Like a Virgin",
         "artist": "Madonna"
     },
     {
@@ -173,6 +177,10 @@
     },
     {
         "title": "Love On The Brain",
+        "artist": "Rihanna"
+    },
+    {
+        "title": "Work",
         "artist": "Rihanna"
     },
     {
@@ -212,10 +220,6 @@
         "artist": "Sia"
     },
     {
-        "title": "Dusk Till Dawn",
-        "artist": "Sia"
-    },
-    {
         "title": "Cheap Thrills",
         "artist": "Sia"
     },
@@ -244,15 +248,11 @@
         "artist": "Taylor Swift"
     },
     {
-        "title": "Don't Blame Me",
+        "title": "Shake It Off",
         "artist": "Taylor Swift"
     },
     {
         "title": "Lush Life",
         "artist": "Zara Larsson"
-    },
-    {
-        "title": "Call Me Maybe",
-        "artist": "Carly Rae Jepsen"
     }
 ]
