@@ -455,6 +455,16 @@
             }
         }
 
+        // Função global infalível para pausar outros áudios
+        function pauseOtherAudios(currentAudio) {
+            const allAudios = document.querySelectorAll('audio');
+            allAudios.forEach(audio => {
+                if (audio !== currentAudio && !audio.paused) {
+                    audio.pause();
+                }
+            });
+        }
+
         function changeTheme(file, btnElement, themeName) {
             if (confirm(`Alterar para a lista "${themeName}" irá reiniciar a batalha. Continuar?`)) {
                 document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
@@ -466,20 +476,16 @@
         }
 
         async function initTournament() {
-            // Limpa as variáveis para o novo tema
             bracket = [ [], [], [], [], [], [], [] ];
             currentRoundIdx = 0;
             matchIndex = 0;
             historyStack = [];
-            
-            // Traz a Arena de volta à vida (Corrige o bug da final)
             undoBtn.disabled = true;
             winnerContainer.style.display = 'none';
             roundTitle.style.display = 'block';
             matchContainer.style.display = 'flex'; 
             matchContainer.innerHTML = '';
             document.getElementById('bracket-board').innerHTML = '';
-            
             loadingText.style.display = 'block';
             
             try {
@@ -493,11 +499,9 @@
             }
         }
 
-        // NOVO: Busca Inteligente com Limite Exato de 5 Segundos
         async function fetchSongInfo(song) {
             if (song.loaded) return song; 
 
-            // Controlador para poder cancelar o download pelo navegador
             const controller = new AbortController();
             const signal = controller.signal;
             
@@ -535,16 +539,13 @@
                 return { img: '', audio: '' };
             })();
 
-            // Cronômetro que explode em 5 segundos
             const timeoutPromise = new Promise(resolve => {
                 setTimeout(() => {
-                    controller.abort(); // Cancela as conexões pendentes para poupar internet
-                    console.warn(`⏳ Busca cancelada por exceder 5s para: ${song.title}`);
-                    resolve({ img: '', audio: '' }); // Ativa o plano C
+                    controller.abort();
+                    resolve({ img: '', audio: '' });
                 }, 5000);
             });
 
-            // Corrida: Quem terminar primeiro (Downloads ou os 5 Segundos) ganha!
             try {
                 const result = await Promise.race([fetchPromise, timeoutPromise]);
                 song.img = result.img;
@@ -671,14 +672,14 @@
                         <div class="song-title">${song.title}</div>
                         <div class="song-artist">${song.artist}</div>
                     </div>
-                    <audio controls><source src="${song.audio || ''}" type="audio/mpeg"></audio>
+                    <audio controls onplay="pauseOtherAudios(this)"><source src="${song.audio || ''}" type="audio/mpeg"></audio>
                     <button class="vote-btn" onclick="processVote(${choiceId})">Votar</button>
                 </div>
             `;
         }
 
         function processVote(choice) {
-            document.querySelectorAll('audio').forEach(a => a.pause());
+            pauseOtherAudios(null); // Pausa tudo ao votar
             historyStack.push({ bracket: JSON.parse(JSON.stringify(bracket)), currentRoundIdx, matchIndex });
             const winner = choice === 1 ? bracket[currentRoundIdx][matchIndex] : bracket[currentRoundIdx][matchIndex + 1];
             bracket[currentRoundIdx + 1].push(winner);
@@ -707,7 +708,7 @@
                         <div class="song-title">${song.title}</div>
                         <div class="song-artist">${song.artist}</div>
                     </div>
-                    ${song.audio ? `<audio controls style="margin-top:auto;"><source src="${song.audio}" type="audio/mpeg"></audio>` : ''}
+                    ${song.audio ? `<audio controls onplay="pauseOtherAudios(this)" style="margin-top:auto;"><source src="${song.audio}" type="audio/mpeg"></audio>` : ''}
                 </div>
             `;
             applyGlobalBlur();
