@@ -64,7 +64,7 @@
             border-color: var(--accent-color);
         }
 
-        /* SELETOR DE TEMAS (LISTAS) */
+        /* SELETOR DE TEMAS */
         .theme-selector {
             display: flex;
             justify-content: center;
@@ -98,27 +98,68 @@
             box-shadow: 0 0 10px rgba(255, 42, 95, 0.5);
         }
 
-        /* TOGGLE OCULTAR IMAGENS */
+        /* TOGGLE SWITCH ESTILO MODERNO */
         .toggle-container {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             margin-bottom: 20px;
             font-size: 14px;
+            font-weight: bold;
             color: #8b92a5;
-            cursor: pointer;
             background: #1c1f26;
-            padding: 8px 15px;
-            border-radius: 20px;
+            padding: 10px 20px;
+            border-radius: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
-        .toggle-container input {
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
             cursor: pointer;
-            width: 18px;
-            height: 18px;
-            accent-color: var(--accent-color);
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #3a3f4c;
+            transition: .3s;
+            border-radius: 24px;
         }
 
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        /* EFEITO DE BLUR */
         .blurred {
             filter: blur(15px);
             transition: filter 0.3s ease;
@@ -278,6 +319,7 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
             box-sizing: border-box;
             overflow-x: auto;
+            -webkit-overflow-scrolling: touch; 
         }
 
         .bracket-board {
@@ -398,10 +440,13 @@
         <button class="theme-btn" onclick="changeTheme('brasil.json', this, 'Músicas Brasileiras')">Brasileiras</button>
     </div>
 
-    <label class="toggle-container">
-        <input type="checkbox" id="hide-images-toggle" onchange="applyGlobalBlur()">
-        Borrar imagens
-    </label>
+    <div class="toggle-container">
+        <span>Borrar imagens</span>
+        <label class="switch">
+            <input type="checkbox" id="hide-images-toggle" onchange="applyGlobalBlur()">
+            <span class="slider"></span>
+        </label>
+    </div>
 
     <h2 id="round-title">Carregando as músicas...</h2>
 
@@ -455,7 +500,6 @@
             }
         }
 
-        // Função global infalível para pausar outros áudios
         function pauseOtherAudios(currentAudio) {
             const allAudios = document.querySelectorAll('audio');
             allAudios.forEach(audio => {
@@ -679,7 +723,7 @@
         }
 
         function processVote(choice) {
-            pauseOtherAudios(null); // Pausa tudo ao votar
+            pauseOtherAudios(null); 
             historyStack.push({ bracket: JSON.parse(JSON.stringify(bracket)), currentRoundIdx, matchIndex });
             const winner = choice === 1 ? bracket[currentRoundIdx][matchIndex] : bracket[currentRoundIdx][matchIndex + 1];
             bracket[currentRoundIdx + 1].push(winner);
@@ -708,7 +752,7 @@
                         <div class="song-title">${song.title}</div>
                         <div class="song-artist">${song.artist}</div>
                     </div>
-                    ${song.audio ? `<audio controls onplay="pauseOtherAudios(this)" style="margin-top:auto;"><source src="${song.audio}" type="audio/mpeg"></audio>` : ''}
+                    ${song.audio ? `<audio controls style="margin-top:auto;" onplay="pauseOtherAudios(this)"><source src="${song.audio}" type="audio/mpeg"></audio>` : ''}
                 </div>
             `;
             applyGlobalBlur();
