@@ -582,13 +582,18 @@
             const fetchPromise = (async () => {
                 const queryFull = encodeURIComponent(`${song.title} ${song.artist}`);
                 
+                // TENTATIVA 1: iTunes via Proxy
                 try {
-                    const response = await fetch(`https://itunes.apple.com/search?term=${queryFull}&entity=song&limit=1`, { signal });
+                    const itunesUrl = encodeURIComponent(`https://itunes.apple.com/search?term=${queryFull}&entity=song&limit=1`);
+                    const proxyItunes = `https://api.allorigins.win/raw?url=${itunesUrl}`;
+                    
+                    const response = await fetch(proxyItunes, { signal });
                     const data = await response.json();
-                    if (data.results.length > 0 && data.results[0].previewUrl) {
+                    
+                    if (data.results && data.results.length > 0 && data.results[0].previewUrl) {
                         return { img: data.results[0].artworkUrl100.replace('100x100bb', '600x600bb'), audio: data.results[0].previewUrl };
                     }
-                } catch (error) { console.warn('Falha no iTunes:', error); }
+                } catch (error) { console.warn('Falha no iTunes via Proxy:', error); }
 
                 try {
                     const deezerUrl = encodeURIComponent(`https://api.deezer.com/search?q=${queryFull}`);
