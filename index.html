@@ -576,11 +576,17 @@
         async function fetchSongInfo(song) {
             if (song.loaded) return song;
         
-            const expectedArtist = normalizeString(song.artist);
+            // Função nativa JS para remover acentos e ignorar maiúsculas/minúsculas
+            const formatString = (str) => {
+                if (!str) return "";
+                return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+            };
+        
+            const expectedArtist = formatString(song.artist);
         
             // Função auxiliar para verificar se o artista bate
             const checkArtistMatch = (fetchedArtist) => {
-                const normFetched = normalizeString(fetchedArtist);
+                const normFetched = formatString(fetchedArtist);
                 return normFetched.includes(expectedArtist) || expectedArtist.includes(normFetched);
             };
         
@@ -655,7 +661,7 @@
                     const deezerUrl = encodeURIComponent(`https://api.deezer.com/search?q=${queryFull}&limit=1`);
                     const proxyUrl = `https://api.allorigins.win/raw?url=${deezerUrl}`; 
                     
-                    const deezerResponse = await fetch(proxyUrl); // Sem o signal, para garantir que o Plano C rode mesmo se A/B abortarem por tempo
+                    const deezerResponse = await fetch(proxyUrl); // Sem o signal, para garantir que o Plano C rode
                     const deezerData = await deezerResponse.json();
         
                     if (deezerData.data && deezerData.data.length > 0) {
@@ -670,7 +676,6 @@
                     }
                 } catch (errC) {
                     console.warn(errC.message);
-                    // Tudo falhou, finalResult continuará null
                 }
             }
         
@@ -679,7 +684,6 @@
                 song.img = finalResult.img;
                 song.audio = finalResult.audio;
             } else {
-                // Se tudo der errado, retorna vazio
                 song.img = '';
                 song.audio = '';
             }
