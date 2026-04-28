@@ -573,125 +573,185 @@
             }
         }
 
-        async function fetchSongInfo(song) {
-            if (song.loaded) return song;
-        
-            // Função nativa JS para remover acentos e ignorar maiúsculas/minúsculas
-            const formatString = (str) => {
-                if (!str) return "";
-                return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-            };
-        
-            const expectedArtist = formatString(song.artist);
-        
-            // Função auxiliar para verificar se o artista bate
-            const checkArtistMatch = (fetchedArtist) => {
-                const normFetched = formatString(fetchedArtist);
-                return normFetched.includes(expectedArtist) || expectedArtist.includes(normFetched);
-            };
-        
-            const controller = new AbortController();
-            const signal = controller.signal;
-        
-            // Timer: Limita a busca primária a 5 segundos. Se estourar o tempo, aborta e vai pro Plano C.
-            const timeoutId = setTimeout(() => {
-                controller.abort();
-            }, 5000);
-        
-            let finalResult = null;
-        
-            try {
-                let planA_Success = false;
-        
-                // --- PLANO A: Busca completa no iTunes (Título + Artista) limitado a 1 resultado ---
-                try {
-                    const queryFull = encodeURIComponent(`${song.title} ${song.artist}`);
-                    const resA = await fetch(`https://itunes.apple.com/search?term=${queryFull}&entity=song&limit=1`, { signal });
-                    const dataA = await resA.json();
-        
-                    if (dataA.results && dataA.results.length > 0) {
-                        const track = dataA.results[0];
-                        if (track.previewUrl && checkArtistMatch(track.artistName)) {
-                            finalResult = { img: track.artworkUrl100.replace('100x100bb', '600x600bb'), audio: track.previewUrl };
-                            planA_Success = true;
-                        } else {
-                            throw new Error("Plano A falhou: Artista incorreto ou sem áudio.");
-                        }
-                    } else {
-                        throw new Error("Plano A falhou: Nenhum resultado.");
-                    }
-                } catch (error) {
-                    if (error.name === 'AbortError') throw error; // Se foi timeout de 5s, repassa para o catch principal
-                    console.warn(error.message);
+       async function fetchSongInfo(song) {
+    if (song.loaded) return song;
+
+    // Remove acentos e converte para minúsculo
+    const formatString = (str) => {
+        if (!str) return "";
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    };
+
+    // Função para verificar similaridade entre artistas
+    const checkArtistMatch = (fetchedArtist, expectedArtistRaw) => {
+        const normFetched = formatString(fetchedArtist);
+        const normExpected = formatString(expectedArtistRaw);
+
+        // 1. Contenção direta (Resolve: "Djonga" dentro de "Djonga e MC Ryan")
+        if (normFetched.includes(normExpected) || normExpected.includes(normFetched)) return true;
+
+        // 2. Distância de Levenshtein (Resolve: "P!nk" e "Pink" ou erros de digitação)
+        const levenshtein = (a, b) => {
+            const matrix = Array.from({ length: a.length + 1 }, () => []);
+            for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
+            for (let j = 0; j <= b.length; j++) matrix[0][j] = j;
+            for (let i = 1; i <= a.length; i++) {
+                for (let j = 1; j <= b.length; j++) {
+                    const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+                    matrix[i][j] = Math.min(
+                        matrix[i - 1][j] + 1, 
+                        matrix[i][j - 1] + 1, 
+                        matrix[i - 1][j - 1] + cost
+                    );
                 }
-        
-                // --- PLANO B: Busca no iTunes apenas por Título limitado a 5 resultados ---
-                if (!planA_Success) {
-                    const queryTitleOnly = encodeURIComponent(song.title);
-                    const resB = await fetch(`https://itunes.apple.com/search?term=${queryTitleOnly}&entity=song&limit=5`, { signal });
-                    const dataB = await resB.json();
-        
-                    if (dataB.results && dataB.results.length > 0) {
-                        const bestMatch = dataB.results.find(track => track.previewUrl && checkArtistMatch(track.artistName));
-                        
-                        if (bestMatch) {
-                            finalResult = { img: bestMatch.artworkUrl100.replace('100x100bb', '600x600bb'), audio: bestMatch.previewUrl };
-                        } else {
-                            throw new Error("Plano B falhou: Nenhum dos 5 resultados tem o artista correto.");
-                        }
-                    } else {
-                        throw new Error("Plano B falhou: Nenhum resultado.");
-                    }
-                }
+            }
+            return matrix[a.length][b.length];
+        };
+
+        // Divide nomes múltiplos (ex: separa por " e ", "&", " feat ")
+        const splitRegex = /\s+(?:feat\.?|ft\.?|e|&|and|com)\s+|,/i;
+        const fetchedParts = normFetched.split(splitRegex).map(s => s.trim()).filter(Boolean);
+        const expectedParts = normExpected.split(splitRegex).map(s => s.trim()).filter(Boolean);
+
+        for (const ep of expectedParts) {
+            for (const fp of fetchedParts) {
+                if (fp.includes(ep) || ep.includes(fp)) return true;
                 
-                clearTimeout(timeoutId); // Limpa o timer se o Plano A ou B derem certo a tempo
+                // Tolerância: permite até ~30% de diferença na palavra (ou 1 caractere no mínimo)
+                const maxErros = Math.max(Math.floor(Math.max(ep.length, fp.length) * 0.3), 1);
+                if (levenshtein(ep, fp) <= maxErros) return true;
+            }
+        }
         
-            } catch (error) {
-                clearTimeout(timeoutId);
-                
-                if (error.name === 'AbortError') {
-                    console.warn("A busca excedeu 5 segundos. Pulando direto para o Plano C.");
+        return false;
+    };
+
+    // Função para descartar remixes não solicitados
+    const isUnwantedRemix = (fetchedTitle, originalTitle) => {
+        if (!fetchedTitle || !originalTitle) return false;
+        const fetchTitleLow = fetchedTitle.toLowerCase();
+        const origTitleLow = originalTitle.toLowerCase();
+        return fetchTitleLow.includes('remix') && !origTitleLow.includes('remix');
+    };
+
+    const controllerAB = new AbortController();
+    const signalAB = controllerAB.signal;
+
+    // Timer: Limita a busca primária (Planos A e B) a 5 segundos
+    const timeoutIdAB = setTimeout(() => {
+        controllerAB.abort();
+    }, 5000);
+
+    let finalResult = null;
+
+    try {
+        let planA_Success = false;
+
+        // --- PLANO A: Busca completa no iTunes (Título + Artista) limitado a 1 resultado ---
+        try {
+            const queryFull = encodeURIComponent(`${song.title} ${song.artist}`);
+            const resA = await fetch(`https://itunes.apple.com/search?term=${queryFull}&entity=song&limit=1`, { signal: signalAB });
+            const dataA = await resA.json();
+
+            if (dataA.results && dataA.results.length > 0) {
+                const track = dataA.results[0];
+                if (track.previewUrl && checkArtistMatch(track.artistName, song.artist) && !isUnwantedRemix(track.trackName, song.title)) {
+                    finalResult = { img: track.artworkUrl100.replace('100x100bb', '600x600bb'), audio: track.previewUrl };
+                    planA_Success = true;
                 } else {
-                    console.warn(error.message);
+                    throw new Error("Plano A falhou: Artista incompatível, sem áudio ou remix indesejado.");
                 }
-        
-                // --- PLANO C: Fallback para o Deezer (Título + Artista) limitado a 1 resultado ---
-                try {
-                    const queryFull = encodeURIComponent(`${song.title} ${song.artist}`);
-                    const deezerUrl = encodeURIComponent(`https://api.deezer.com/search?q=${queryFull}&limit=1`);
-                    const proxyUrl = `https://api.allorigins.win/raw?url=${deezerUrl}`; 
-                    
-                    const deezerResponse = await fetch(proxyUrl); // Sem o signal, para garantir que o Plano C rode
-                    const deezerData = await deezerResponse.json();
-        
-                    if (deezerData.data && deezerData.data.length > 0) {
-                        const track = deezerData.data[0];
-                        if (track.preview && checkArtistMatch(track.artist.name)) {
-                            finalResult = { img: track.album.cover_xl, audio: track.preview };
-                        } else {
-                            throw new Error("Plano C falhou: Artista incorreto ou sem áudio no Deezer.");
-                        }
-                    } else {
-                        throw new Error("Plano C falhou: Nenhum resultado.");
-                    }
-                } catch (errC) {
-                    console.warn(errC.message);
-                }
-            }
-        
-            // --- Parte Final ---
-            if (finalResult) {
-                song.img = finalResult.img;
-                song.audio = finalResult.audio;
             } else {
-                song.img = '';
-                song.audio = '';
+                throw new Error("Plano A falhou: Nenhum resultado.");
             }
-        
-            song.loaded = true;
-            return song;
+        } catch (error) {
+            if (error.name === 'AbortError') throw error;
+            console.warn(error.message);
         }
 
+        // --- PLANO B: Busca no iTunes apenas por Título limitado a 5 resultados ---
+        if (!planA_Success) {
+            const queryTitleOnly = encodeURIComponent(song.title);
+            const resB = await fetch(`https://itunes.apple.com/search?term=${queryTitleOnly}&entity=song&limit=5`, { signal: signalAB });
+            const dataB = await resB.json();
+
+            if (dataB.results && dataB.results.length > 0) {
+                const bestMatch = dataB.results.find(track => 
+                    track.previewUrl && 
+                    checkArtistMatch(track.artistName, song.artist) && 
+                    !isUnwantedRemix(track.trackName, song.title)
+                );
+                
+                if (bestMatch) {
+                    finalResult = { img: bestMatch.artworkUrl100.replace('100x100bb', '600x600bb'), audio: bestMatch.previewUrl };
+                } else {
+                    throw new Error("Plano B falhou: Nenhum dos 5 resultados atende aos critérios.");
+                }
+            } else {
+                throw new Error("Plano B falhou: Nenhum resultado.");
+            }
+        }
+        
+        clearTimeout(timeoutIdAB); 
+
+    } catch (error) {
+        clearTimeout(timeoutIdAB);
+        
+        if (error.name === 'AbortError') {
+            console.warn("A busca inicial excedeu 5 segundos. Pulando para o Plano C.");
+        } else {
+            console.warn(error.message);
+        }
+
+        // --- PLANO C: Fallback para o Deezer (Título + Artista) limitado a 1 resultado com limite de 5s ---
+        const controllerC = new AbortController();
+        const signalC = controllerC.signal;
+        
+        const timeoutIdC = setTimeout(() => {
+            controllerC.abort();
+        }, 5000);
+
+        try {
+            const queryFull = encodeURIComponent(`${song.title} ${song.artist}`);
+            const deezerUrl = encodeURIComponent(`https://api.deezer.com/search?q=${queryFull}&limit=1`);
+            const proxyUrl = `https://api.allorigins.win/raw?url=${deezerUrl}`; 
+            
+            const deezerResponse = await fetch(proxyUrl, { signal: signalC });
+            const deezerData = await deezerResponse.json();
+
+            if (deezerData.data && deezerData.data.length > 0) {
+                const track = deezerData.data[0];
+                if (track.preview && checkArtistMatch(track.artist.name, song.artist) && !isUnwantedRemix(track.title, song.title)) {
+                    finalResult = { img: track.album.cover_xl, audio: track.preview };
+                } else {
+                    throw new Error("Plano C falhou: Artista incompatível, sem áudio ou remix indesejado no Deezer.");
+                }
+            } else {
+                throw new Error("Plano C falhou: Nenhum resultado.");
+            }
+        } catch (errC) {
+            if (errC.name === 'AbortError') {
+                console.warn("Plano C falhou: A busca no Deezer excedeu 5 segundos.");
+            } else {
+                console.warn(errC.message);
+            }
+        } finally {
+            clearTimeout(timeoutIdC);
+        }
+    }
+
+    // --- Parte Final ---
+    if (finalResult) {
+        song.img = finalResult.img;
+        song.audio = finalResult.audio;
+    } else {
+        song.img = '';
+        song.audio = '';
+    }
+
+    song.loaded = true;
+    return song;
+}
         function renderBracketUI() {
             const board = document.getElementById('bracket-board');
             board.innerHTML = '';
