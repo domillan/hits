@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Batalha de Hits Pop</title>
+    <title>Batalha de Hits</title>
     <style>
         :root {
             --bg-color: #0f1115;
@@ -32,7 +32,7 @@
             font-size: 2.5em;
             text-transform: uppercase;
             letter-spacing: 2px;
-            margin-top: 20px;
+            margin-top: 40px;
         }
 
         h2 {
@@ -62,6 +62,40 @@
             background-color: var(--accent-color);
             color: #fff;
             border-color: var(--accent-color);
+        }
+
+        /* SELETOR DE TEMAS (LISTAS) */
+        .theme-selector {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            max-width: 900px;
+        }
+
+        .theme-btn {
+            background-color: #2a2e38;
+            color: #fff;
+            border: 2px solid transparent;
+            padding: 10px 20px;
+            font-size: 14px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: bold;
+        }
+
+        .theme-btn:hover {
+            background-color: #3a3f4c;
+            transform: scale(1.05);
+        }
+
+        .theme-btn.active {
+            background-color: var(--accent-color);
+            border-color: #fff;
+            box-shadow: 0 0 10px rgba(255, 42, 95, 0.5);
         }
 
         .controls {
@@ -109,7 +143,6 @@
             flex-wrap: wrap;
             max-width: 1000px;
             width: 100%;
-            transition: opacity 0.3s ease; /* Transição suave */
         }
 
         .vs-badge {
@@ -209,17 +242,13 @@
 
         #loading {
             display: none;
-            font-size: 18px;
+            font-size: 24px;
             color: var(--accent-color);
             font-weight: bold;
             position: absolute; 
             animation: pulse 1s infinite alternate;
             text-align: center;
             z-index: 50;
-            background-color: rgba(28, 31, 38, 0.95);
-            padding: 15px 30px;
-            border-radius: 30px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
 
         @keyframes pulse {
@@ -388,7 +417,17 @@
 
     <button class="restart-btn" onclick="restartTournament()">🔄 Reiniciar Tudo</button>
 
-    <h1>Batalha de Hits Pop</h1>
+    <h1 id="main-title">Batalha de Hits: Anos 2000 e 2010</h1>
+
+    <div class="theme-selector">
+        <button class="theme-btn" onclick="changeTheme('1980e1990.json', this, 'Anos 80 e 90')">Anos 80 e 90</button>
+        <button class="theme-btn" onclick="changeTheme('rock.json', this, 'Rock')">Rock</button>
+        <button class="theme-btn" onclick="changeTheme('divaspop.json', this, 'Divas Pop')">Divas Pop</button>
+        <button class="theme-btn active" onclick="changeTheme('2000e2010.json', this, 'Anos 2000 e 2010')">Anos 2000 e 2010</button>
+        <button class="theme-btn" onclick="changeTheme('funk.json', this, 'Funk')">Funk</button>
+        <button class="theme-btn" onclick="changeTheme('brasil.json', this, 'Músicas Brasileiras')">Brasileiras</button>
+    </div>
+
     <h2 id="round-title">Carregando as músicas...</h2>
 
     <div class="controls">
@@ -398,8 +437,7 @@
     <div class="arena">
         <div id="loading">Buscando músicas na internet... 🎧</div>
 
-        <div class="match-container" id="match-container">
-            </div>
+        <div class="match-container" id="match-container"></div>
 
         <div id="winner-container">
             <h1 style="color: gold; text-shadow: 0 0 10px rgba(255,215,0,0.5);">🏆 A MELHOR MÚSICA 🏆</h1>
@@ -418,6 +456,8 @@
         let currentRoundIdx = 0; 
         let matchIndex = 0;      
         let historyStack = [];   
+        
+        let currentThemeFile = '2000e2010.json';
 
         const matchContainer = document.getElementById('match-container');
         const roundTitle = document.getElementById('round-title');
@@ -425,13 +465,45 @@
         const undoBtn = document.getElementById('undo-btn');
         const winnerContainer = document.getElementById('winner-container');
 
-        // Função para carregar o JSON inicial
+        // Altera o tema atual se o usuário confirmar
+        function changeTheme(file, btnElement, themeName) {
+            if (confirm(`Alterar para a lista "${themeName}" irá apagar a batalha atual e reiniciá-la. Tem certeza?`)) {
+                // Atualiza os botões visualmente
+                document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+                btnElement.classList.add('active');
+                
+                // Atualiza o Título e o Arquivo JSON alvo
+                document.getElementById('main-title').innerText = `Batalha de Hits: ${themeName}`;
+                currentThemeFile = file;
+                
+                initTournament();
+            }
+        }
+
+        // Função Principal para Carregar JSON e Iniciar/Reiniciar
         async function initTournament() {
+            // Limpeza Total de Variáveis de Estado
+            bracket = [ [], [], [], [], [], [], [] ];
+            currentRoundIdx = 0;
+            matchIndex = 0;
+            historyStack = [];
+            
+            // Restaura Visuais da Arena
+            undoBtn.disabled = true;
+            winnerContainer.style.display = 'none';
+            roundTitle.style.display = 'block';
+            matchContainer.innerHTML = '';
+            document.getElementById('bracket-board').innerHTML = '';
+
             loadingText.style.display = 'block';
             loadingText.innerText = "Carregando lista de músicas... 📂";
+            loadingText.style.color = "var(--accent-color)";
+            
+            matchContainer.style.opacity = '0.3';
+            matchContainer.style.pointerEvents = 'none';
             
             try {
-                const response = await fetch('songs.json');
+                const response = await fetch(currentThemeFile);
                 
                 if (!response.ok) {
                     throw new Error("Erro ao carregar o arquivo.");
@@ -442,16 +514,13 @@
                 // Embaralha as músicas e joga na primeira rodada
                 bracket[0] = [...initialSongs].sort(() => Math.random() - 0.5); 
                 
-                // Restaura o texto de carregamento padrão
                 loadingText.innerText = "Buscando músicas na internet... 🎧";
-                
-                // Inicia o jogo sem esconder o container
                 loadingText.style.display = 'none';
                 renderMatch();
 
             } catch (error) {
                 console.error("Erro no JSON:", error);
-                loadingText.innerText = "Erro ao carregar songs.json!\n(Lembre-se de usar um servidor local)";
+                loadingText.innerText = `Erro ao carregar o arquivo '${currentThemeFile}'!\nCertifique-se de que ele foi criado e que o site está num servidor local.`;
                 loadingText.style.color = "red";
             }
         }
@@ -463,9 +532,10 @@
             }
         }, true);
 
+        // O botão superior de reiniciar agora roda o Init sem recarregar a página toda
         function restartTournament() {
-            if (confirm("Tem certeza que deseja apagar tudo e iniciar um novo torneio do zero?")) {
-                location.reload();
+            if (confirm("Tem certeza que deseja apagar a progressão e iniciar este torneio do zero?")) {
+                initTournament();
             }
         }
 
@@ -603,8 +673,6 @@
             updateRoundTitle();
             undoBtn.disabled = historyStack.length === 0;
 
-            // CORREÇÃO: Mantém o container no lugar, apenas deixa opaco e impede cliques. 
-            // O site NÃO encolhe mais!
             matchContainer.style.opacity = '0.3';
             matchContainer.style.pointerEvents = 'none';
             loadingText.style.display = 'block';
@@ -620,7 +688,6 @@
                                        `<div class="vs-badge">VS</div>` + 
                                        createCardHTML(song2, 2);
                                        
-            // Traz o container de volta após carregar
             matchContainer.style.opacity = '1';
             matchContainer.style.pointerEvents = 'auto';
             
@@ -688,6 +755,7 @@
             `;
         }
 
+        // Inicia o torneio
         initTournament();
     </script>
 </body>
