@@ -565,7 +565,7 @@
         }
 
         function changeTheme(file, btnElement, themeName) {
-            if (confirm(`Alterar para a lista "${themeName}" irá reiniciar a batalha. Continuar?`)) {
+            if ((currentRoundIdx == 0 && matchIndex == 0) || confirm(`Alterar para a lista "${themeName}" irá reiniciar a batalha. Continuar?`)) {
                 document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
                 btnElement.classList.add('active');
                 document.getElementById('main-title').innerText = `Batalha de Músicas: ${themeName}`;
