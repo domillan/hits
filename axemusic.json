@@ -1,130 +1,66 @@
 [
-  {
-    "title": "Fricote",
-    "artist": "Luiz Caldas"
-  },
-  {
-    "title": "É D'Oxum",
-    "artist": "Gerônimo"
-  },
-  {
-    "title": "Chame Gente",
-    "artist": "Moraes Moreira, Armandinho"
-  },
-  {
-    "title": "Faraó (Divindade do Egito)",
-    "artist": "Margareth Menezes / Banda Mel"
-  },
-  {
-    "title": "Madagascar Olodum",
-    "artist": "Banda Reflexu's"
-  },
-  {
-    "title": "Protesto do Olodum",
-    "artist": "Banda Mel / Olodum"
-  },
-  {
-    "title": "Prefixo de Verão",
-    "artist": "Banda Mel"
-  },
-  {
-    "title": "Baianidade Nagô",
-    "artist": "Banda Mel"
-  },
-  {
-    "title": "O Canto da Cidade",
-    "artist": "Daniela Mercury"
-  },
-  {
-    "title": "Vem Meu Amor",
-    "artist": "Banda Eva (com Ivete Sangalo)"
-  },
-  {
-    "title": "Beija-Flor",
-    "artist": "Timbalada"
-  },
-  {
-    "title": "Requebra",
-    "artist": "Olodum"
-  },
-  {
-    "title": "Milla",
-    "artist": "Netinho / Jheremmias"
-  },
-  {
-    "title": "É o Tchan (Pau que Nasce Torto)",
-    "artist": "É o Tchan (Gera Samba)"
-  },
-  {
-    "title": "Beleza Rara",
-    "artist": "Banda Eva (com Ivete Sangalo)"
-  },
-  {
-    "title": "Levada Louca",
-    "artist": "Banda Eva (com Ivete Sangalo)"
-  },
-  {
-    "title": "Margarida Perfumada",
-    "artist": "Timbalada"
-  },
-  {
-    "title": "Arerê",
-    "artist": "Banda Eva (com Ivete Sangalo)"
-  },
-  {
-    "title": "Rapunzel",
-    "artist": "Daniela Mercury"
-  },
-  {
-    "title": "Água Mineral",
-    "artist": "Timbalada"
-  },
-  {
-    "title": "Dança do Vampiro",
-    "artist": "Asa de Águia"
-  },
-  {
-    "title": "Festa",
-    "artist": "Ivete Sangalo"
-  },
-  {
-    "title": "Dandalunda",
-    "artist": "Margareth Menezes"
-  },
-  {
-    "title": "Sorte Grande",
-    "artist": "Ivete Sangalo"
-  },
-  {
-    "title": "100% Você",
-    "artist": "Chiclete com Banana"
-  },
-  {
-    "title": "Quebra Aê",
-    "artist": "Asa de Águia"
-  },
-  {
-    "title": "Rebolation",
-    "artist": "Parangolé (com Léo Santana)"
-  },
-  {
-    "title": "Liga da Justiça",
-    "artist": "Leva Noiz"
-  },
-  {
-    "title": "Lepo Lepo",
-    "artist": "Psirico"
-  },
-  {
-    "title": "Santinha",
-    "artist": "Léo Santana"
-  },
-  {
-    "title": "Zona de Perigo",
-    "artist": "Léo Santana"
-  },
-  {
-    "title": "Perna Bamba",
-    "artist": "Parangolé & Léo Santana"
-  }
+  { "title": "Fricote", "artist": "Luiz Caldas" },
+  { "title": "É D'Oxum", "artist": "Gerônimo" },
+  { "title": "Chame Gente", "artist": "Moraes Moreira e Armandinho" },
+  { "title": "Faraó (Divindade do Egito)", "artist": "Margareth Menezes" },
+  { "title": "Madagascar Olodum", "artist": "Banda Reflexu's" },
+  { "title": "Protesto do Olodum", "artist": "Olodum" },
+  { "title": "Prefixo de Verão", "artist": "Banda Mel" },
+  { "title": "Baianidade Nagô", "artist": "Banda Mel" },
+  { "title": "O Canto da Cidade", "artist": "Daniela Mercury" },
+  { "title": "Vem Meu Amor", "artist": "Banda Eva" },
+  { "title": "Beija-Flor", "artist": "Timbalada" },
+  { "title": "Requebra", "artist": "Olodum" },
+  { "title": "Milla", "artist": "Netinho" },
+  { "title": "É o Tchan (Pau que Nasce Torto)", "artist": "É o Tchan" },
+  { "title": "Beleza Rara", "artist": "Banda Eva" },
+  { "title": "Levada Louca", "artist": "Banda Eva" },
+  { "title": "Margarida Perfumada", "artist": "Timbalada" },
+  { "title": "Arerê", "artist": "Banda Eva" },
+  { "title": "Rapunzel", "artist": "Daniela Mercury" },
+  { "title": "Água Mineral", "artist": "Timbalada" },
+  { "title": "Dança do Vampiro", "artist": "Asa de Águia" },
+  { "title": "Festa", "artist": "Ivete Sangalo" },
+  { "title": "Dandalunda", "artist": "Margareth Menezes" },
+  { "title": "Sorte Grande", "artist": "Ivete Sangalo" },
+  { "title": "100% Você", "artist": "Chiclete com Banana" },
+  { "title": "Quebra Aê", "artist": "Asa de Águia" },
+  { "title": "Rebolation", "artist": "Parangolé" },
+  { "title": "Liga da Justiça", "artist": "Leva Noiz" },
+  { "title": "Lepo Lepo", "artist": "Psirico" },
+  { "title": "Santinha", "artist": "Léo Santana" },
+  { "title": "Zona de Perigo", "artist": "Léo Santana" },
+  { "title": "Perna Bamba", "artist": "Parangolé e Léo Santana" },
+  { "title": "Swing da Cor", "artist": "Daniela Mercury" },
+  { "title": "Ara Ketu Bom Demais", "artist": "Ara Ketu" },
+  { "title": "Vai Sacudir, Vai Abalar", "artist": "Banda Cheiro de Amor" },
+  { "title": "Eva", "artist": "Banda Eva" },
+  { "title": "Mal Acostumada", "artist": "Ara Ketu" },
+  { "title": "Diga Que Valeu", "artist": "Chiclete com Banana" },
+  { "title": "Voa Voa", "artist": "Chiclete com Banana" },
+  { "title": "Cabelo Raspadinho", "artist": "Chiclete com Banana" },
+  { "title": "A Latinha", "artist": "Timbalada" },
+  { "title": "Liberar Geral", "artist": "Terra Samba" },
+  { "title": "Carrinho de Mão", "artist": "Terra Samba" },
+  { "title": "Dança da Manivela", "artist": "Asa de Águia" },
+  { "title": "Bate Lata", "artist": "Banda Beijo" },
+  { "title": "Beijo na Boca", "artist": "Banda Beijo" },
+  { "title": "Nossa Gente (Avisa Lá)", "artist": "Olodum" },
+  { "title": "Xibom Bombom", "artist": "As Meninas" },
+  { "title": "Vem Neném", "artist": "Harmonia do Samba" },
+  { "title": "Agachadinho", "artist": "Harmonia do Samba" },
+  { "title": "Maimbê Dandá", "artist": "Daniela Mercury" },
+  { "title": "Cadê Dalila", "artist": "Ivete Sangalo" },
+  { "title": "Bola de Sabão", "artist": "Babado Novo" },
+  { "title": "Amor Perfeito", "artist": "Babado Novo" },
+  { "title": "Praieiro", "artist": "Jammil e Uma Noites" },
+  { "title": "Tchau, I Have To Go Now", "artist": "Jammil e Uma Noites" },
+  { "title": "Coração", "artist": "Rapazolla" },
+  { "title": "Uma Bomba", "artist": "Bragaboys" },
+  { "title": "Onda Onda (Olha a Onda)", "artist": "Tchakabum" },
+  { "title": "We Are The World of Carnaval", "artist": "Asa de Águia" },
+  { "title": "Não Tem Lua", "artist": "Asa de Águia" },
+  { "title": "Eu Sou Negão", "artist": "Gerônimo" },
+  { "title": "A Roda", "artist": "Sarajane" },
+  { "title": "Ziriguidum", "artist": "Filhos de Jorge" }
 ]
