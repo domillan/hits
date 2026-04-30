@@ -106,6 +106,8 @@
         .toggle-container {
             display: flex;
             align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
             gap: 12px;
             margin-bottom: 20px;
             font-size: 14px;
@@ -161,6 +163,11 @@
 
         input:checked + .slider:before {
             transform: translateX(20px);
+        }
+        
+        input:disabled + .slider {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         /* EFEITO DE BLUR */
@@ -480,11 +487,16 @@
         <button class="theme-btn" onclick="changeTheme('axemusic.json', this, 'Axé')">Axé</button>
         <button class="theme-btn" onclick="changeTheme('rapbrasil.json', this, 'Rap Nacional')">Rap Nacional</button>
         <button class="theme-btn" onclick="changeTheme('funk.json', this, 'Funk')">Funk</button>
-        
     </div>
 
     <div class="toggle-container">
-        <span>Borrar imagens</span>
+        <span>Versão reduzida</span>
+        <label class="switch" title="Inicia diretamente na Fase de 16 com apenas 32 músicas.">
+            <input type="checkbox" id="reduced-version-toggle" onchange="handleReducedToggle(this)">
+            <span class="slider"></span>
+        </label>
+        
+        <span style="margin-left: 20px;">Borrar imagens</span>
         <label class="switch">
             <input type="checkbox" id="hide-images-toggle" onchange="applyGlobalBlur()">
             <span class="slider"></span>
@@ -517,6 +529,7 @@
         let matchIndex = 0;      
         let historyStack = [];   
         let currentThemeFile = '2000e2010.json';
+        let hasVoted = false; // Controle para bloqueio da versão reduzida
 
         const matchContainer = document.getElementById('match-container');
         const roundTitle = document.getElementById('round-title');
@@ -535,6 +548,16 @@
                     '"': '&quot;'
                 }[tag])
             );
+        }
+
+        // Lógica do botão de versão reduzida
+        function handleReducedToggle(checkbox) {
+            if (checkbox.checked && !hasVoted) {
+                alert("A versão reduzida, apesar de mais rápida, exclui várias músicas da lista. Teste a versão normal para obter a experiência completa.");
+            }
+            if (!hasVoted) {
+                initTournament();
+            }
         }
 
         function applyGlobalBlur() {
@@ -588,10 +611,26 @@
             document.getElementById('bracket-board').innerHTML = '';
             loadingText.style.display = 'block';
             
+            hasVoted = false;
+            document.getElementById('reduced-version-toggle').disabled = false;
+            
+            const isReducedVersion = document.getElementById('reduced-version-toggle').checked;
+
             try {
                 const response = await fetch(currentThemeFile);
-                const initialSongs = await response.json();
-                bracket[0] = [...initialSongs].sort(() => Math.random() - 0.5); 
+                let initialSongs = await response.json();
+                initialSongs.sort(() => Math.random() - 0.5); 
+                
+                if (isReducedVersion) {
+                    // Pega apenas 32 músicas e as coloca direto na chave da Fase de 16
+                    bracket[1] = initialSongs.slice(0, 32);
+                    currentRoundIdx = 1;
+                } else {
+                    // Carrega as 64 na chave da Fase de 32
+                    bracket[0] = initialSongs.slice(0, 64);
+                    currentRoundIdx = 0;
+                }
+                
                 loadingText.style.display = 'none';
                 renderMatch();
             } catch (error) {
@@ -603,21 +642,17 @@
        async function fetchSongInfo(song) {
             if (song.loaded) return song;
 
-            // Remove acentos e converte para minúsculo
             const formatString = (str) => {
                 if (!str) return "";
                 return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
             };
 
-            // Função para verificar similaridade entre artistas
             const checkArtistMatch = (fetchedArtist, expectedArtistRaw) => {
                 const normFetched = formatString(fetchedArtist);
                 const normExpected = formatString(expectedArtistRaw);
 
-                // 1. Contenção direta
                 if (normFetched.includes(normExpected) || normExpected.includes(normFetched)) return true;
 
-                // 2. Distância de Levenshtein (Resolve: "P!nk" e "Pink" ou erros de digitação)
                 const levenshtein = (a, b) => {
                     const matrix = Array.from({ length: a.length + 1 }, () => []);
                     for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
@@ -635,7 +670,6 @@
                     return matrix[a.length][b.length];
                 };
 
-                // Divide nomes múltiplos (ex: separa por " e ", "&", " feat ")
                 const splitRegex = /\s+(?:feat\.?|ft\.?|e|&|and|com)\s+|,/i;
                 const fetchedParts = normFetched.split(splitRegex).map(s => s.trim()).filter(Boolean);
                 const expectedParts = normExpected.split(splitRegex).map(s => s.trim()).filter(Boolean);
@@ -643,8 +677,6 @@
                 for (const ep of expectedParts) {
                     for (const fp of fetchedParts) {
                         if (fp.includes(ep) || ep.includes(fp)) return true;
-                        
-                        // Tolerância: permite até ~30% de diferença na palavra (ou 1 caractere no mínimo)
                         const maxErros = Math.max(Math.floor(Math.max(ep.length, fp.length) * 0.3), 1);
                         if (levenshtein(ep, fp) <= maxErros) return true;
                     }
@@ -653,7 +685,6 @@
                 return false;
             };
 
-            // Função para descartar remixes não solicitados
             const isUnwantedRemix = (fetchedTitle, originalTitle) => {
                 if (!fetchedTitle || !originalTitle) return false;
                 const fetchTitleLow = fetchedTitle.toLowerCase();
@@ -664,7 +695,6 @@
             const controllerAB = new AbortController();
             const signalAB = controllerAB.signal;
 
-            // Timer: Limita a busca primária (Planos A e B) a 5 segundos
             const timeoutIdAB = setTimeout(() => {
                 controllerAB.abort();
             }, 3000);
@@ -674,7 +704,6 @@
             try {
                 let planA_Success = false;
 
-                // --- PLANO A: Busca completa no iTunes (Título + Artista) limitado a 1 resultado ---
                 try {
                     const queryFull = encodeURIComponent(`${song.title} ${song.artist}`);
                     const resA = await fetch(`https://itunes.apple.com/search?term=${queryFull}&entity=song&limit=1`, { signal: signalAB });
@@ -686,17 +715,15 @@
                             finalResult = { img: track.artworkUrl100.replace('100x100bb', '600x600bb'), audio: track.previewUrl };
                             planA_Success = true;
                         } else {
-                            throw new Error("Plano A falhou: Artista incompatível, sem áudio ou remix indesejado.");
+                            throw new Error("Plano A falhou");
                         }
                     } else {
-                        throw new Error("Plano A falhou: Nenhum resultado.");
+                        throw new Error("Plano A falhou");
                     }
                 } catch (error) {
                     if (error.name === 'AbortError') throw error;
-                    console.warn(error.message);
                 }
 
-                // --- PLANO B: Busca no iTunes apenas por Título limitado a 5 resultados ---
                 if (!planA_Success) {
                     const queryTitleOnly = encodeURIComponent(song.title);
                     const resB = await fetch(`https://itunes.apple.com/search?term=${queryTitleOnly}&entity=song&limit=5`, { signal: signalAB });
@@ -712,10 +739,10 @@
                         if (bestMatch) {
                             finalResult = { img: bestMatch.artworkUrl100.replace('100x100bb', '600x600bb'), audio: bestMatch.previewUrl };
                         } else {
-                            throw new Error("Plano B falhou: Nenhum dos 5 resultados atende aos critérios.");
+                            throw new Error("Plano B falhou");
                         }
                     } else {
-                        throw new Error("Plano B falhou: Nenhum resultado.");
+                        throw new Error("Plano B falhou");
                     }
                 }
                 
@@ -724,13 +751,6 @@
             } catch (error) {
                 clearTimeout(timeoutIdAB);
                 
-                if (error.name === 'AbortError') {
-                    console.warn("A busca inicial excedeu 3 segundos. Pulando para o Plano C.");
-                } else {
-                    console.warn(error.message);
-                }
-
-                // --- PLANO C: Fallback para o Deezer (Título + Artista) limitado a 1 resultado com limite de 5s ---
                 const controllerC = new AbortController();
                 const signalC = controllerC.signal;
                 
@@ -750,24 +770,15 @@
                         const track = deezerData.data[0];
                         if (track.preview && checkArtistMatch(track.artist.name, song.artist) && !isUnwantedRemix(track.title, song.title)) {
                             finalResult = { img: track.album.cover_xl, audio: track.preview };
-                        } else {
-                            throw new Error("Plano C falhou: Artista incompatível, sem áudio ou remix indesejado no Deezer.");
                         }
-                    } else {
-                        throw new Error("Plano C falhou: Nenhum resultado.");
                     }
                 } catch (errC) {
-                    if (errC.name === 'AbortError') {
-                        console.warn("Plano C falhou: A busca no Deezer excedeu 3 segundos.");
-                    } else {
-                        console.warn(errC.message);
-                    }
+                    // Fallback ignorado silenciosamente
                 } finally {
                     clearTimeout(timeoutIdC);
                 }
             }
 
-            // --- Parte Final ---
             if (finalResult) {
                 song.img = finalResult.img;
                 song.audio = finalResult.audio;
@@ -784,6 +795,7 @@
             const board = document.getElementById('bracket-board');
             board.innerHTML = '';
             const isBlurred = document.getElementById('hide-images-toggle').checked;
+            const isReducedVersion = document.getElementById('reduced-version-toggle').checked;
 
             const columnsConfig = [
                 { r: 0, side: 'left' }, { r: 1, side: 'left' }, { r: 2, side: 'left' },
@@ -805,7 +817,9 @@
                 title.innerText = colDef.side === 'center' ? 'Vencedora' : roundNames[colDef.r];
                 col.appendChild(title);
 
-                const totalInRound = bracket[0].length / Math.pow(2, colDef.r);
+                // Determina total para manter layout mesmo com chaves esvaziadas pela versão reduzida
+                const totalSongs = bracket[0].length > 0 ? bracket[0].length : (bracket[1].length > 0 ? bracket[1].length * 2 : 64);
+                const totalInRound = totalSongs / Math.pow(2, colDef.r);
                 const itemsInCol = colDef.side === 'center' ? 1 : totalInRound / 2;
                 const size = thumbSizes[colDef.r];
 
@@ -819,7 +833,7 @@
                     const song = bracket[colDef.r][index];
                     
                     let isRevealed = true;
-                    if (colDef.r === 0 && currentRoundIdx === 0 && index > matchIndex + 1) {
+                    if (colDef.r === currentRoundIdx && index > matchIndex + 1) {
                         isRevealed = false;
                     }
 
@@ -834,7 +848,12 @@
                         const safeArtist = escapeHTML(song.artist);
                         slot.innerHTML += `<span class="tooltip">${safeTitle}<br>${safeArtist}</span>`;
                     } else {
-                        slot.innerText = "?";
+                        if (isReducedVersion && colDef.r === 0) {
+                            slot.innerText = "N/A";
+                            slot.style.opacity = "0.2";
+                        } else {
+                            slot.innerText = "?";
+                        }
                     }
 
                     col.appendChild(slot);
@@ -891,7 +910,6 @@
             const safeArtist = escapeHTML(song.artist);
             const imgSrc = song.img || `https://ui-avatars.com/api/?size=320&background=1c1f26&color=ff2a5f&font-size=0.5&name=${encodeURIComponent(song.title.charAt(0))}`;
             
-            // Fallback para o YouTube caso não haja áudio
             const ytQuery = encodeURIComponent(`${song.title} ${song.artist}`);
             const mediaElement = song.audio 
                 ? `<audio controls onplay="pauseOtherAudios(this)"><source src="${song.audio}" type="audio/mpeg"></audio>`
@@ -911,6 +929,12 @@
         }
 
         function processVote(choice) {
+            // Bloqueia a alteração da versão reduzida logo após o primeiro voto
+            if (!hasVoted) {
+                hasVoted = true;
+                document.getElementById('reduced-version-toggle').disabled = true;
+            }
+
             pauseOtherAudios(null); 
             historyStack.push({ bracket: JSON.parse(JSON.stringify(bracket)), currentRoundIdx, matchIndex });
             const winner = choice === 1 ? bracket[currentRoundIdx][matchIndex] : bracket[currentRoundIdx][matchIndex + 1];
@@ -936,7 +960,6 @@
             const safeTitle = escapeHTML(song.title);
             const safeArtist = escapeHTML(song.artist);
             
-            // Fallback para o YouTube na tela de vencedor
             const ytQuery = encodeURIComponent(`${song.title} ${song.artist}`);
             const mediaElement = song.audio 
                 ? `<audio controls style="margin-top:auto;" onplay="pauseOtherAudios(this)"><source src="${song.audio}" type="audio/mpeg"></audio>`
