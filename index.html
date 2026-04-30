@@ -459,11 +459,86 @@
         .bracket-column:last-child .tooltip::after { left: auto; right: 15px; margin-left: 0; }
 
         @media (max-width: 768px) {
-            h1 { font-size: 1.8em; margin-top: 40px; }
+            h1 { font-size: 1.5em; margin-top: 50px; }
             .arena { min-height: auto; padding-bottom: 20px; }
-            .match-container { flex-direction: column; gap: 15px; }
-            .card { width: 100%; max-width: 320px; height: auto; min-height: 480px; }
-            .vs-badge { font-size: 20px; padding: 10px; margin: -20px 0; }
+            .match-container { flex-direction: column; gap: 8px; }
+            
+            /* Transformando o card em um layout horizontal compacto */
+            .card { 
+                width: 100%; 
+                max-width: 100%; 
+                height: auto; 
+                min-height: unset; 
+                display: grid;
+                grid-template-columns: 80px 1fr auto;
+                grid-template-rows: auto auto;
+                gap: 5px 12px;
+                padding: 10px;
+                text-align: left;
+            }
+            
+            .card img { 
+                width: 80px; 
+                height: 80px; 
+                margin-bottom: 0; 
+                grid-column: 1; 
+                grid-row: 1 / 3;
+            }
+            
+            .card-info { 
+                grid-column: 2; 
+                grid-row: 1; 
+                align-items: flex-start; 
+                justify-content: center;
+            }
+            
+            .song-title { 
+                font-size: 15px; 
+                margin: 0;
+                white-space: normal; 
+                display: -webkit-box; 
+                -webkit-line-clamp: 2; 
+                -webkit-box-orient: vertical; 
+            }
+            
+            .song-artist { font-size: 13px; margin-bottom: 0; }
+            
+            audio { 
+                grid-column: 2; 
+                grid-row: 2; 
+                height: 35px; 
+                margin-bottom: 0; 
+                width: 100%; 
+            }
+            
+            .yt-fallback-link {
+                grid-column: 2;
+                grid-row: 2;
+                margin-bottom: 0;
+                padding: 5px;
+                font-size: 11px;
+            }
+            
+            .vote-btn { 
+                grid-column: 3; 
+                grid-row: 1 / 3; 
+                width: auto; 
+                padding: 0 15px; 
+                height: 100%; 
+                font-size: 14px; 
+                margin-top: 0; 
+            }
+            
+            .vs-badge { 
+                font-size: 14px; 
+                padding: 8px; 
+                margin: 2px 0; 
+                width: 30px; 
+                height: 30px; 
+                display: flex; 
+                align-items: center; 
+                justify-content: center; 
+            }
         }
     </style>
 </head>
@@ -762,15 +837,19 @@
                 try {
                     const queryFull = encodeURIComponent(`${song.title} ${song.artist}`);
                     const deezerUrl = encodeURIComponent(`https://api.deezer.com/search?q=${queryFull}&limit=1`);
-                    const proxyUrl = `https://api.allorigins.win/raw?url=${deezerUrl}`; 
+                    const proxyUrl = `https://api.allorigins.win/get?url=${deezerUrl}`; 
                     
                     const deezerResponse = await fetch(proxyUrl, { signal: signalC });
-                    const deezerData = await deezerResponse.json();
+                    const proxyData = await deezerResponse.json();
 
-                    if (deezerData.data && deezerData.data.length > 0) {
-                        const track = deezerData.data[0];
-                        if (track.preview && checkArtistMatch(track.artist.name, song.artist) && !isUnwantedRemix(track.title, song.title)) {
-                            finalResult = { img: track.album.cover_xl, audio: track.preview };
+                    if (proxyData.contents) {
+                        const deezerData = JSON.parse(proxyData.contents);
+
+                        if (deezerData.data && deezerData.data.length > 0) {
+                            const track = deezerData.data[0];
+                            if (track.preview && checkArtistMatch(track.artist.name, song.artist) && !isUnwantedRemix(track.title, song.title)) {
+                                finalResult = { img: track.album.cover_xl, audio: track.preview };
+                            }
                         }
                     }
                 } catch (errC) {
