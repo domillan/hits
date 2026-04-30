@@ -837,7 +837,7 @@
                 try {
                     const queryFull = encodeURIComponent(`${song.title} ${song.artist}`);
                     const deezerUrl = encodeURIComponent(`https://api.deezer.com/search?q=${queryFull}&limit=1`);
-                    const proxyUrl = `https://api.allorigins.win/get?url=${deezerUrl}`; 
+                    const proxyUrl = `https://corsproxy.io/?${deezerUrl}`; 
                     
                     const deezerResponse = await fetch(proxyUrl, { signal: signalC });
                     const proxyData = await deezerResponse.json();
